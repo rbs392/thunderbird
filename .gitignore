@@ -1,0 +1,4 @@
+jobs/.idea/*
+jobs/target/*
+jobs/project/target/*
+bin/done
