@@ -1,0 +1,73 @@
+---
+- name: Fetch elastic search tar for web
+  get_url: 
+    url: https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-5.6.3.tar.gz
+    dest: /tmp/elasticsearch.tar.gz
+
+- name: Make apps dir
+  become: yes
+  become_user: thunderbird
+  command: mkdir -p /home/thunderbird/apps
+
+- name: Extract the elastic search tar
+  become: true
+  become_user: thunderbird
+  unarchive:
+    remote_src: yes
+    src: /tmp/elasticsearch.tar.gz
+    dest: /home/thunderbird/apps
+
+- name: Make config dir
+  become: yes
+  become_user: thunderbird
+  command: mkdir -p /home/thunderbird/apps/elasticsearch-5.6.3/config/{{ node.name }}
+  state: present
+
+
+- name: Setup elasticsearch config
+  become: true
+  become_user: thunderbird
+  template:
+    src: ../config/elasticsearch.yml.j2
+    dest: /home/thunderbird/apps/elasticsearch-5.6.3/config/{{ node.name }}/elasticsearch.yml
+  state: present
+
+
+- name: Setup jvm config
+  become: true
+  become_user: thunderbird
+  template:
+    src: ../config/jvm.options.j2
+    dest: /home/thunderbird/apps/elasticsearch-5.6.3/config/jvm.options
+  state: present
+
+
+- name: Setup elasticsearch config
+  become: true
+  become_user: thunderbird
+  template:
+    src: ../config/log4j2.properties.j2
+    dest: /home/thunderbird/apps/elasticsearch-5.6.3/config/{{ node.name }}/log4j2.properties
+  state: present
+
+- name: set limits
+  become: true
+  become_user: root
+  command: sysctl -w vm.max_map_count=262144
+
+- debug:
+    var: node
+
+- name: Start elastic search
+  become: true
+  become_user: thunderbird
+  command: nohup ./bin/elasticsearch -Epath.conf=/home/thunderbird/apps/elasticsearch-5.6.3/config/{{ node.name }} -d -p pid
+  args:
+    chdir: /home/thunderbird/apps/elasticsearch-5.6.3
+  
+- name: wait for server to be up
+  wait_for: 
+    host: 0.0.0.0
+    port: "{{ node.port }}"
+    timeout: 300
+    delay: 5

@@ -1,0 +1,8 @@
+---
+- name: wait for start
+  wait_for: 
+    host: 0.0.0.0
+    port: "{{ node.port }}"
+    timeout: 300
+    delay: 5
+

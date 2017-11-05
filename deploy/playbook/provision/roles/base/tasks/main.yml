@@ -1,0 +1,87 @@
+---
+- name: Create a new group
+  become: true
+  become_user: root
+  group: 
+    name: search
+    state: present
+
+- name: Allow 'search' group to have passwordless sudo
+  become: true
+  become_user: root
+  lineinfile:
+    dest: /etc/sudoers
+    state: present
+    regexp: '^%search'
+    line: '%search ALL=(ALL) NOPASSWD: ALL'
+    validate: 'visudo -cf %s'
+
+
+- name: Add new user
+  become: true
+  become_user: root
+  user:
+    name: thunderbird
+    groups: 
+      - search
+      - sudo
+
+- name: Apt get upgrade
+  become: true
+  become_user: root
+  apt:
+    upgrade: yes
+    update_cache: yes
+    allow_unauthenticated: true
+    cache_valid_time: 86400 #One day
+
+- name: Install htop
+  become: true
+  become_user: root
+  apt:
+    name: htop
+    force: yes
+    state: present
+    install-recommends: yes
+
+- name: Install vim
+  become: true
+  become_user: root
+  apt:
+    name: vim
+    state: present
+    install-recommends: yes
+    
+
+- name: Install build essential
+  become: true
+  become_user: root
+  apt:
+    name: build-essential
+    install-recommends: yes
+    state: present
+
+- name: Install certificates
+  become: true
+  become_user: root
+  apt:
+    name: ca-certificates
+    install-recommends: yes
+    state: present
+
+- name: Install libxt-dev
+  become: true
+  become_user: root
+  apt:
+    name: libxt-dev
+    state: present
+    install-recommends: yes
+
+- name: Install Java 8
+  become: true
+  become_user: root
+  apt:
+    name: openjdk-8-jdk
+    state: present
+    install-recommends: yes
+    

@@ -1,0 +1,3 @@
+---
+- import_playbook: infra/main.yml
+- import_playbook: provision/main.yml

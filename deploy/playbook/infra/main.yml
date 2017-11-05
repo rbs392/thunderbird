@@ -1,0 +1,45 @@
+---
+- hosts: localhost
+  remote_user: ubuntu
+  tasks:
+    - name: Provision a ec2 instance
+      ec2:
+        image: ami-cd0f5cb6
+        instance_type: m4.large
+        instance_tags: { "Owner": "search", "Name": "thunderbird", "Environment": "dev" }
+        count: "{{ [no_of_master_nodes, no_of_data_nodes] | max }}"
+        region: us-east-1
+        vpc_subnet_id: subnet-1e239735
+        wait: true
+        key_name: ansible.pem
+
+    - name: Get running instances
+      ec2_instance_facts:
+        region: us-east-1
+        filters:
+          "tag:Name": thunderbird
+          "tag:Owner": search
+          "tag:Environment": dev
+          "instance-state-name": running
+      register: ec2
+
+    - name: Add master ips to inventory 
+      add_host:
+        groups: thunderbird_master
+        name: "{{ item.private_ip_address }}"
+      with_items: "{{ ec2.instances[ : no_of_master_nodes ] }}"
+    
+    - name: Add data ips to inventory 
+      add_host:
+        groups: thunderbird_data
+        name: "{{ item.private_ip_address }}"
+      with_items: "{{ ec2.instances[ : no_of_data_nodes ] }}"
+
+    - name: Check for host to be reachable
+      wait_for:
+        host: "{{ item.private_ip_address }}"
+        port: 22
+        delay: 60
+        timeout: 300
+        state: started
+      with_items: "{{ ec2.instances }}"

@@ -1,0 +1,6 @@
+---
+ansible_ssh_private_key_file: /home/bala/Downloads/ansible.pem
+ansible_ssh_common_args: -o StrictHostKeyChecking=no
+
+no_of_master_nodes: 2
+no_of_data_nodes: 4

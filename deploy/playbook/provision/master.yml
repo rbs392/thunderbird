@@ -1,0 +1,17 @@
+---
+- hosts: thunderbird_master
+  remote_user: ubuntu
+  
+  tasks:
+    - name: Provision base requirements
+      import_role:
+        name: base
+
+    - name: Setup master node
+      import_role:
+        name: elasticsearch
+      vars:
+        node:
+          name: "master"
+          port: 9200
+          hosts: "{{ hostvars['localhost'].ec2 | json_query('instances[*].private_ip_address') }}"

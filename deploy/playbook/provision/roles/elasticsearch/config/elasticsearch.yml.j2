@@ -1,0 +1,12 @@
+cluster.name: thunderbird
+node.name: {{ node.name }}
+
+network.host: 0.0.0.0
+http.port: {{ node.port }}
+discovery.zen.ping.unicast.hosts:
+  {% for host in node.hosts %}
+  - {{ host }}
+  {% endfor %}  
+
+path.logs: /home/thunderbird/apps/elasticsearch-5.6.3/logs/{{ node.name }}
+path.data: /home/thunderbird/apps/elasticsearch-5.6.3/data/{{ node.name }}
