@@ -2,3 +2,5 @@ jobs/.idea/*
 jobs/target/*
 jobs/project/target/*
 bin/done
+deploy/playbook/main.retry
+jobs/project/project/*
